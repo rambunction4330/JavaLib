@@ -20,7 +20,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import com.revrobotics.spark.*;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
