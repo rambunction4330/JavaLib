@@ -1,16 +1,9 @@
 package frc.robot.Lib;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Revolution;
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
 import java.util.ArrayList;
 
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -19,21 +12,12 @@ import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-import com.revrobotics.spark.config.SparkBaseConfig;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.units.AccelerationUnit;
-import edu.wpi.first.units.VelocityUnit;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.CurrentUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
-
-import edu.wpi.first.units.LinearVelocityUnit;
-import edu.wpi.first.units.Unit;
 
 public class SparkMaxPositionController {
 
@@ -61,7 +45,7 @@ public class SparkMaxPositionController {
     }
 
     public record createInfo(motorConfig motorConfig, pidConfig pidConfig,
-            ArrayList<SparkMaxPositionController> following, range range, feedBack feedBack, profiling profileConfig) {
+            SparkMaxPositionController leadController, range range, feedBack feedBack, profiling profileConfig) {
     }
 
     public SparkMaxPositionController(final createInfo info) {
@@ -98,17 +82,14 @@ public class SparkMaxPositionController {
             controlType = SparkBase.ControlType.kPosition;
         }
 
-        for (SparkMaxPositionController leader : info.following) {
-            config.follow(leader.info.motorConfig.id, leader.info.motorConfig.inverted);
-        }
+            config.follow(info.leadController.getMotor(), info.leadController.info.motorConfig.inverted);
 
         sparkMax.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     void setPosition(Angle position, double ff) {
 
-        Angle targetPos = Angle.ofBaseUnits(Math.max(info.range.minPosition.magnitude(),
-                Math.min(position.magnitude(), info.range.maxPosition.magnitude())), Rotations);
+        Angle targetPos = Angle.ofBaseUnits(MathUtil.clamp(position.magnitude(),info.range.minPosition.magnitude(), info.range.maxPosition.magnitude()), Rotations);
 
         sparkMax.getClosedLoopController().setReference(targetPos.magnitude() * info.feedBack.gearRatio, controlType,
                 ClosedLoopSlot.kSlot0, ff);
@@ -124,6 +105,10 @@ public class SparkMaxPositionController {
                 Math.min(position.magnitude(), info.range.maxPosition.magnitude())), Rotations);
 
         sparkMax.getEncoder().setPosition(targetPos.magnitude()); 
+    }
+
+    SparkMax getMotor(){
+        return sparkMax; 
     }
 
     void setPower(double power) {
