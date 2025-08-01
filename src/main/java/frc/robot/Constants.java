@@ -4,10 +4,6 @@
 
 package frc.robot;
 
-import frc.robot.Lib.SparkMaxPositionController;
-import frc.robot.Lib.SparkMaxPositionController.createInfo;
-import frc.robot.Lib.SparkMaxPositionController.motorConfig;
-import frc.robot.Lib.SparkMaxPositionController.pidConfig;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide

@@ -13,7 +13,6 @@ import static edu.wpi.first.units.Units.Rotations;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
-import edu.wpi.first.units.Units;
 
 
 public class ExampleConstants {

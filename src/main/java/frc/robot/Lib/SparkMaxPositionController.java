@@ -1,7 +1,6 @@
 package frc.robot.Lib;
 
 import static edu.wpi.first.units.Units.Rotations;
-import java.util.ArrayList;
 
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -14,7 +13,6 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -82,14 +80,15 @@ public class SparkMaxPositionController {
             controlType = SparkBase.ControlType.kPosition;
         }
 
-            config.follow(info.leadController.getMotor(), info.leadController.info.motorConfig.inverted);
+        config.follow(info.leadController.getMotor(), info.leadController.info.motorConfig.inverted);
 
         sparkMax.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     void setPosition(Angle position, double ff) {
 
-        Angle targetPos = Angle.ofBaseUnits(MathUtil.clamp(position.magnitude(),info.range.minPosition.magnitude(), info.range.maxPosition.magnitude()), Rotations);
+        Angle targetPos = Angle.ofBaseUnits(MathUtil.clamp(position.magnitude(), info.range.minPosition.magnitude(),
+                info.range.maxPosition.magnitude()), Rotations);
 
         sparkMax.getClosedLoopController().setReference(targetPos.magnitude() * info.feedBack.gearRatio, controlType,
                 ClosedLoopSlot.kSlot0, ff);
@@ -100,15 +99,8 @@ public class SparkMaxPositionController {
         return Angle.ofBaseUnits(sparkMax.getEncoder().getPosition() / info.feedBack.gearRatio, Rotations);
     }
 
-    void setEncoderPosition(Angle position){
-        Angle targetPos = Angle.ofBaseUnits(Math.max(info.range.minPosition.magnitude(),
-                Math.min(position.magnitude(), info.range.maxPosition.magnitude())), Rotations);
-
-        sparkMax.getEncoder().setPosition(targetPos.magnitude()); 
-    }
-
-    SparkMax getMotor(){
-        return sparkMax; 
+    void setEncoderPosition(Angle position) {
+        sparkMax.getEncoder().setPosition(position.magnitude());
     }
 
     void setPower(double power) {
@@ -133,6 +125,10 @@ public class SparkMaxPositionController {
 
     void disable() {
         sparkMax.disable();
+    }
+
+    SparkMax getMotor() {
+        return sparkMax;
     }
 
 }

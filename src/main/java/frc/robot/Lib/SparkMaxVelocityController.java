@@ -2,8 +2,6 @@ package frc.robot.Lib;
 
 import static edu.wpi.first.units.Units.RevolutionsPerSecond;
 
-import java.util.ArrayList;
-
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -18,7 +16,7 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 public class SparkMaxVelocityController {
-    private final SparkMax sparkMax;
+    private  SparkMax sparkMax;
 
     private final ControlType controlType;
 
@@ -39,7 +37,7 @@ public class SparkMaxVelocityController {
     }
 
     public record createInfo(motorConfig motorConfig, pidConfig pidConfig,
-            ArrayList<SparkMaxVelocityController> following, feedBack feedBack, profiling profileConfig) {
+            SparkMaxVelocityController leader, feedBack feedBack, profiling profileConfig) {
     }
 
     public SparkMaxVelocityController(createInfo info) {
@@ -69,10 +67,7 @@ public class SparkMaxVelocityController {
             controlType = SparkBase.ControlType.kVelocity;
         }
 
-        for (SparkMaxVelocityController leader : info.following) {
-            config.follow(leader.getMotor(), leader.info.motorConfig.inverted);
-
-        }
+        config.follow(info.leader.getMotor(), info.leader.info.motorConfig.inverted);
 
         sparkMax.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
@@ -84,13 +79,13 @@ public class SparkMaxVelocityController {
 
     void setPower(double power) {
         sparkMax.set(power);
-    } 
+    }
 
-    void disable(){
+    void disable() {
         sparkMax.disable();
     }
 
-    void stop(){
+    void stop() {
         sparkMax.stopMotor();
     }
 
