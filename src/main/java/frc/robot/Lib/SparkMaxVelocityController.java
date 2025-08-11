@@ -1,6 +1,7 @@
 package frc.robot.Lib;
 
-import static edu.wpi.first.units.Units.RevolutionsPerSecond;
+
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -14,6 +15,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 
 public class SparkMaxVelocityController {
     private  SparkMax sparkMax;
@@ -72,24 +74,28 @@ public class SparkMaxVelocityController {
         sparkMax.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
-    void setVelocity(AngularVelocity velocity) {
-        AngularVelocity targetVelocity = AngularVelocity.ofBaseUnits(velocity.magnitude(), RevolutionsPerSecond);
+    public void setVelocity(AngularVelocity velocity) {
+        AngularVelocity targetVelocity = AngularVelocity.ofBaseUnits(velocity.magnitude(), RotationsPerSecond);
         sparkMax.getClosedLoopController().setReference(targetVelocity.magnitude(), controlType);
     }
 
-    void setPower(double power) {
+    public AngularVelocity getVelocity(){
+       return RotationsPerSecond.of(sparkMax.getEncoder().getVelocity()); 
+    }
+
+    public void setPower(double power) {
         sparkMax.set(power);
     }
 
-    void disable() {
+    public void disable() {
         sparkMax.disable();
     }
 
-    void stop() {
+    public void stop() {
         sparkMax.stopMotor();
     }
 
-    SparkMax getMotor() {
+    public SparkMax getMotor() {
         return sparkMax;
     }
 }

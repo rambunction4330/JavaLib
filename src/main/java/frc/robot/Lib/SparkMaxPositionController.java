@@ -85,7 +85,7 @@ public class SparkMaxPositionController {
         sparkMax.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
-    void setPosition(Angle position, double ff) {
+    public void setPosition(Angle position, double ff) {
 
         Angle targetPos = Angle.ofBaseUnits(MathUtil.clamp(position.magnitude(), info.range.minPosition.magnitude(),
                 info.range.maxPosition.magnitude()), Rotations);
@@ -95,39 +95,39 @@ public class SparkMaxPositionController {
 
     }
 
-    Angle getPosition() {
+    public Angle getPosition() {
         return Angle.ofBaseUnits(sparkMax.getEncoder().getPosition() / info.feedBack.gearRatio, Rotations);
     }
 
-    void setEncoderPosition(Angle position) {
+    public void setEncoderPosition(Angle position) {
         sparkMax.getEncoder().setPosition(position.magnitude());
     }
 
-    void setPower(double power) {
+    public void setPower(double power) {
         sparkMax.set(power);
     }
 
-    double getPower() {
+    public double getPower() {
         return sparkMax.get();
     }
 
-    Angle getMaxPos() {
+   public Angle getMaxPos() {
         return info.range.maxPosition;
     }
 
-    Angle getMinPos() {
+    public Angle getMinPos() {
         return info.range.minPosition;
     }
 
-    void stop() {
+    public void stop() {
         sparkMax.stopMotor();
     }
 
-    void disable() {
+    public void disable() {
         sparkMax.disable();
     }
 
-    SparkMax getMotor() {
+    public SparkMax getMotor() {
         return sparkMax;
     }
 

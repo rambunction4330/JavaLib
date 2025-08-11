@@ -1,23 +1,19 @@
 package frc.robot.Lib;
 
-import static edu.wpi.first.units.Units.Rotations;
-
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
-
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 
-public class TalonFXPositionController {
-
+public class TalonFXVelocityController {
     enum isInverted {
         NOT_INVERTED,
         INVERTED
@@ -28,14 +24,13 @@ public class TalonFXPositionController {
         NEUTRAL
     }
 
-    private TalonFX talonMotorController; 
-    
+    private TalonFX talonMotorController;
 
     public record motorConfig(int id, isInverted inverted,
             brakeMode mode, double minOutput, double maxOutput) {
     }
 
-    public record pidConfig(double p, double i, double d, double kS, double kG) {
+    public record pidConfig(double p, double i, double d, double kS, double kV) {
     }
 
     public record limitsConfig(boolean statorCurrentEnable, Current statorCurrentLimit, boolean supplyCurrentEnable,
@@ -55,11 +50,11 @@ public class TalonFXPositionController {
 
     private final createInfo info;
 
-    public TalonFXPositionController(createInfo info) {
+    TalonFXVelocityController(createInfo info) {
         this.info = info;
-
         TalonFXConfiguration config = new TalonFXConfiguration();
-        talonMotorController = new TalonFX(info.motorConfig.id);
+
+        talonMotorController = new TalonFX(info.motorConfig.id); 
 
         config.MotorOutput.Inverted = InvertedValue.valueOf(info.motorConfig.inverted.ordinal());
         config.MotorOutput.NeutralMode = NeutralModeValue.valueOf(info.motorConfig.mode.ordinal());
@@ -70,11 +65,7 @@ public class TalonFXPositionController {
         config.Slot0.kI = info.pidConfig.i;
         config.Slot0.kD = info.pidConfig.d;
         config.Slot0.kS = info.pidConfig.kS;
-        config.Slot0.kG = info.pidConfig.kG;
-
-        // Refer to these links when implementing any sort of Current Limits
-        // https://www.chiefdelphi.com/t/current-limiting-talonfx-values/374780/4 and
-        // https://www.chiefdelphi.com/t/current-limiting-on-swerve/454392/2
+        config.Slot0.kV = info.pidConfig.kV; 
 
         config.CurrentLimits.StatorCurrentLimitEnable = info.currentLimits.statorCurrentEnable;
         config.CurrentLimits.StatorCurrentLimit = info.currentLimits.statorCurrentLimit.magnitude();
@@ -85,47 +76,39 @@ public class TalonFXPositionController {
         config.ClosedLoopGeneral.ContinuousWrap = info.range.isContinuous;
 
         talonMotorController.getConfigurator().apply(config);
-    }
-
-    public void setPosition(Angle position) {
-        Angle targetPos = Angle.ofBaseUnits(MathUtil.clamp(position.magnitude(), info.range.maxPos.magnitude(),
-                info.range.maxPos.magnitude()), Rotations);
-
-        talonMotorController.setControl(new PositionDutyCycle(targetPos));
 
     }
 
-    public Angle getPosition() {
+    public void setVelocity(AngularVelocity velocity){
 
-        StatusSignal<Angle> signal = talonMotorController.getRotorPosition(true);
-
-        return signal.getValue();
+        talonMotorController.setControl(new VelocityDutyCycle(velocity)); 
 
     }
 
-    public void setPower(double power) {
-        talonMotorController.set(power); 
+    public AngularVelocity getVelocity(){
+        StatusSignal<AngularVelocity> signal = talonMotorController.getVelocity(true);
+        return signal.getValue(); 
+    }
+
+    public void setPower(double power){
+
+        talonMotorController.set(power);
     }
 
     public double getPower(){
         return talonMotorController.get(); 
     }
 
-    public void setEncoderPosition() {
-
-       /// 
-
-    }
-
-    public void disable() {
-        talonMotorController.disable();
-    }
-
-    public void stop() {
+    public void stop(){
         talonMotorController.stopMotor();
     }
 
-    public void follow(TalonFXPositionController followController) {
+    public void disable(){
+        talonMotorController.disable();
+    }
+
+
+    public void follow(TalonFXVelocityController followController) {
 
         boolean invert; 
 
